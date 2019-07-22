@@ -10676,3 +10676,9 @@ footer img.brand-icon {
   height: 17px;
 }
 
+/* User.gravatar */
+
+section.user_info {
+  text-align: center;
+}
+

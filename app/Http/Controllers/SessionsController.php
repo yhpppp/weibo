@@ -35,5 +35,12 @@ class SessionsController extends Controller
     }
 
     public function destroy()
-    { }
+    { 
+        // 用户登出
+        Auth::logout();
+        // 闪存提示
+        session()->flash('success','下次见~!');
+        // 重定向
+        return redirect('/');
+    }
 }

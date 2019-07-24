@@ -21,9 +21,9 @@ class SessionsController extends Controller
             'email' => 'required|email|max:255',
             'password' => 'required'
         ]);
-        // return dump($credentials);
+        
         // 数据库验证
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials,$request->has('remember'))) {
             // 消息提示
             session()->flash('success','欢迎回来');
             // 页面重定向

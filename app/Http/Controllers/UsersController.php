@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Auth;
+
 class UsersController extends Controller
 {
     /**
@@ -14,6 +15,15 @@ class UsersController extends Controller
     {
         return  view('users.create');
     }
+
+    /**
+     * 用户编辑页
+     */
+    public function edit(User $user)
+    {
+        return view('users.edit', compact('user'));
+    }
+
 
     /**
      * 用户个人页
@@ -42,8 +52,31 @@ class UsersController extends Controller
 
         // 自动登录
         Auth::login($user);
-        
+
         session()->flash('success', '欢迎新人!');
         return redirect()->route('users.show', [$user]);
+    }
+
+    /**
+     * 更新处理
+     */
+    public function update(User $user, Request $request)
+    {
+        $this->validate($request, [
+            'name' => 'required|max:50',
+            'password' => 'nullable|confirmed|min:6'
+        ]);
+        
+        $data = [];
+        $data['name'] = $request->name;
+        if($request->password){
+            $data['password'] = bcrypt($request->password);
+        }
+        
+        $user->update($data);
+
+        session()->flash('success','修改成功!~');
+        
+        return redirect()->route('users.show', $user->id);
     }
 }

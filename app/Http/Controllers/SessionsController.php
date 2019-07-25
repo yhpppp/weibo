@@ -9,6 +9,13 @@ use Illuminate\Http\Request;
 
 class SessionsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('guest',[
+            'only' => ['create']
+        ]);
+    }
+    
     public function create()
     {
         return view('sessions.create');
@@ -27,7 +34,9 @@ class SessionsController extends Controller
             // 消息提示
             session()->flash('success','欢迎回来');
             // 页面重定向
-            return redirect()->route('users.show', [Auth::user()]);
+           $fallback =  route('users.show', [Auth::user()]);
+            // 友好的转向
+            return redirect()->intended($fallback);
         } else {
             session()->flash('danger','sorry! 您的邮箱与密码不匹配.');
             return redirect()->back()->withInput();

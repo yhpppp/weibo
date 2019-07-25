@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Auth;
+use Mail;
 
 class UsersController extends Controller
 {
@@ -13,7 +14,7 @@ class UsersController extends Controller
     {
         // 未登录用户的限制
         $this->middleware('auth', [
-            'except' => ['show', 'create' , 'store', 'index']
+            'except' => ['show', 'create', 'store', 'index', 'confirmEmail']
         ]);
 
         // 只让未登录用户访问注册页面：
@@ -48,10 +49,10 @@ class UsersController extends Controller
     {
         // 分页
         $userAll = User::paginate(10);
-        return view('users.index',compact('userAll'));
+        return view('users.index', compact('userAll'));
     }
-    
-    
+
+
     /**
      * 用户个人页
      */
@@ -78,10 +79,31 @@ class UsersController extends Controller
         ]);
 
         // 自动登录
-        Auth::login($user);
+        // Auth::login($user);
 
-        session()->flash('success', '欢迎新人!');
-        return redirect()->route('users.show', [$user]);
+        // 激活邮箱
+        $this->sendEmailConfirmationTo($user);
+
+        session()->flash('success', '验证邮件已发送到你的注册邮箱上，请注意查收!');
+        return redirect('/');
+    }
+
+    /**
+     * 发送邮件给指定用户
+     */
+    public function sendEmailConfirmationTo($user)
+    {
+        $view = 'emails.confirm'; // param-1 邮件消息的视图名称
+        $data = compact('user'); // param-2 传递给该视图的数据数组。
+        $from = 'summer@example.com';
+        $name = 'Summer';
+        $to = $user->email;
+        $subject = '请确认你的邮箱';
+
+        // param-3 接收邮件消息实例的闭包回调，我们可以在该回调中自定义邮件消息的发送者、接收者、邮件主题等信息。
+        Mail::send($view, $data, function ($message) use ($from, $name, $to, $subject) {
+            $message->from($from, $name)->to($to)->subject($subject);
+        });
     }
 
     /**
@@ -114,10 +136,25 @@ class UsersController extends Controller
      */
     public function destroy(User $user)
     {
-        $this->authorize('destroy',$user);
-        $user-> delete();
-        session()->flash('success','删除成功!');
+        $this->authorize('destroy', $user);
+        $user->delete();
+        session()->flash('success', '删除成功!');
         return back();
     }
-    
+
+    /**
+     * 完成用户的激活操作
+     */
+    public function confirmEmail($token)
+    {
+        $user = User::where('activation_token', $token)->firstOrFail();
+
+        $user->activated = true;
+        $user->activation_token = null;
+        $user->save();
+
+        Auth::login($user);
+        session()->flash('success', '恭喜你，激活成功！');
+        return redirect()->route('users.show', [$user]);
+    }
 }

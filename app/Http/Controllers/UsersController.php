@@ -41,7 +41,17 @@ class UsersController extends Controller
         return view('users.edit', compact('user'));
     }
 
-
+    /**
+     * 用户列表页
+     */
+    public function index()
+    {
+        // 分页
+        $userAll = User::paginate(10);
+        return view('users.index',compact('userAll'));
+    }
+    
+    
     /**
      * 用户个人页
      */

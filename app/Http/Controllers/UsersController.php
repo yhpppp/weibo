@@ -13,7 +13,7 @@ class UsersController extends Controller
     {
         // 未登录用户的限制
         $this->middleware('auth', [
-            'except' => ['show', 'create' . 'store']
+            'except' => ['show', 'create' , 'store', 'index']
         ]);
 
         // 只让未登录用户访问注册页面：
@@ -108,4 +108,16 @@ class UsersController extends Controller
 
         return redirect()->route('users.show', $user->id);
     }
+
+    /**
+     * 删除处理 
+     */
+    public function destroy(User $user)
+    {
+        $this->authorize('destroy',$user);
+        $user-> delete();
+        session()->flash('success','删除成功!');
+        return back();
+    }
+    
 }

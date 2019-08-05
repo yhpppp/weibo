@@ -46,11 +46,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public static function boot(){
+    public static function boot()
+    {
         parent::boot();
 
-        static::creating(function($user){
+        static::creating(function ($user) {
             $user->activation_token = Str::random(10);
         });
+    }
+
+    // 一个用户拥有多条微博。
+    public function statuses()
+    {
+        return $this->hasMany(Status::class);
     }
 }

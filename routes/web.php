@@ -47,3 +47,8 @@ Route::get('/users/{user}/followings', 'UsersController@followings')->name('user
 
 // 粉丝列表
 Route::get('/users/{user}/followers', 'UsersController@followers')->name('users.followers');
+
+// 关注用户
+Route::post('/users/followers/{user}', 'FollowingsController@store')->name('followers.store');
+//取消用户
+Route::delete('/users/followers/{user}', 'FollowingsController@destroy')->name('followers.destroy');
